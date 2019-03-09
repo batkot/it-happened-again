@@ -1,0 +1,51 @@
+name:                it-happened-again
+version:             0.1.0.0
+github:              "batkot/it-happened-again"
+license:             MIT
+author:              "Tomasz Batko"
+maintainer:          "batkot@protonmail.com"
+copyright:           "Tomasz Batko"
+
+extra-source-files:
+- README.md
+- ChangeLog.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            application
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:         Please see the README on GitHub at <https://github.com/batkot/it-happened-again#readme>
+
+dependencies:
+- base >= 4.7 && < 5
+
+library:
+  source-dirs: src
+
+executables:
+  it-happened-again-exe:
+    main:                Main.hs
+    source-dirs:         app
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - it-happened-again
+
+tests:
+  it-happened-again-test:
+    main:                Spec.hs
+    source-dirs:         test
+    ghc-options:
+    - -threaded
+    - -rtsopts
+    - -with-rtsopts=-N
+    dependencies:
+    - it-happened-again
+    - tasty >= 1.2 && < 2
+    - tasty-quickcheck >= 0.10 && < 1
+    - QuickCheck >= 2.12 && < 3

@@ -38,7 +38,7 @@ executables:
 
 tests:
   it-happened-again-test:
-    main:                Spec.hs
+    main:                Test.hs
     source-dirs:         test
     ghc-options:
     - -threaded
@@ -48,4 +48,5 @@ tests:
     - it-happened-again
     - tasty >= 1.2 && < 2
     - tasty-quickcheck >= 0.10 && < 1
+    - tasty-discover >= 4.2 && < 5
     - QuickCheck >= 2.12 && < 3

@@ -66,6 +66,6 @@ packages:
 #
 
 ghc-options:
-    "$everything": -Wall 
+    "$everything": -Wall -XMultiParamTypeClasses -XFunctionalDependencies -XInstanceSigs
 
 rebuild-ghc-options: true

@@ -24,6 +24,8 @@ dependencies:
 
 library:
   source-dirs: src
+  dependencies:
+  - time >= 1.8 && < 2
 
 executables:
   it-happened-again-exe:

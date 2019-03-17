@@ -48,14 +48,14 @@ data Error
     deriving (Show, Eq)
 
 innerApply :: Event -> Tracking -> Tracking
-innerApply (Created trackId name) Empty = 
-    Running $ TrackingData trackId name []
-innerApply (Happened time place) (Running track) = 
+innerApply (Created trackId trackName) Empty = 
+    Running $ TrackingData trackId trackName []
+innerApply (Happened evTime evPlace) (Running track) = 
     Running $ track { occurances = newOccurances }
   where
-    occurance = Occurance time place
+    occurance = Occurance evTime evPlace
     newOccurances = occurance : occurances track
-innerApply (Finished time) (Running track) = Archived track
+innerApply (Finished _) (Running track) = Archived track
 innerApply _ s = s
 
 instance DDD.EventSourced Tracking Command Event Error where
@@ -63,9 +63,9 @@ instance DDD.EventSourced Tracking Command Event Error where
     initState = Empty
 
     execute :: Tracking -> Command -> Either Error [Event]
-    execute Empty (Create id name) = DDD.singleEvent $ Created id name
-    execute (Running track) (Track time place) = DDD.singleEvent $ Happened time place
-    execute (Running track) (Finish time) = DDD.singleEvent $ Finished time
+    execute Empty (Create trackId trackName) = DDD.singleEvent $ Created trackId trackName
+    execute (Running _) (Track evTime evPlace) = DDD.singleEvent $ Happened evTime evPlace
+    execute (Running _) (Finish finishTime) = DDD.singleEvent $ Finished finishTime
     execute (Archived _) _ = DDD.failure TrackingAlreadyClosed
     execute _ _ = DDD.failure Error
 

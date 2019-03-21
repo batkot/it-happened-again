@@ -1,4 +1,4 @@
-module DomainDrivenDesign
+module DomainDrivenDesign.Silly
     ( EventSourced(..)
     , Restoring
     , rebuildAggregate

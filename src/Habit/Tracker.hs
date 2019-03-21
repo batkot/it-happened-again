@@ -7,7 +7,7 @@ module Habit.Tracker
     , Error(..)
     ) where
 
-import qualified DomainDrivenDesign as DDD
+import qualified DomainDrivenDesign.Silly as DDD
 
 import Data.Time (UTCTime)
 

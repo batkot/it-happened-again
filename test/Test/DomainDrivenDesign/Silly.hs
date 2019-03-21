@@ -1,11 +1,11 @@
-module Test.DomainDrivenDesign
+module Test.DomainDrivenDesign.Silly
     ( given
     , expectSingleEvent
     , expectFailure
     , aggregateStateTests
     ) where
 
-import DomainDrivenDesign
+import DomainDrivenDesign.Silly
 
 import Test.Tasty (testGroup, TestTree)
 

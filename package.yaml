@@ -26,6 +26,8 @@ library:
   source-dirs: src
   dependencies:
   - time >= 1.8 && < 2
+  - transformers >= 0.5 && < 1
+  - mtl >= 2.2 && < 3
 
 executables:
   it-happened-again-exe:

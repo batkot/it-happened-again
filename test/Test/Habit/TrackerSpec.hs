@@ -13,7 +13,7 @@ import Test.Tasty (testGroup, TestTree)
 import Test.Tasty.QuickCheck (testProperty)
 import Test.QuickCheck (Arbitrary, arbitrary, oneof, listOf)
 
-import Test.DomainDrivenDesign (given, expectFailure, expectSingleEvent)
+import Test.DomainDrivenDesign.Silly (given, expectFailure, expectSingleEvent)
 
 test_tracker :: TestTree
 test_tracker = testGroup "Tracker aggregate tests" 

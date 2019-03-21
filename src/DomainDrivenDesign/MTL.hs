@@ -1,21 +1,21 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE AllowAmbiguousTypes #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module DomainDrivenDesign.MTL 
     ( Restoring
     , EventSourced
     , rebuildState
+    , AggregateMonad(..)
     
-    , raiseError
-    , raiseEvent
-    , getAggregate
-    , runAggregate
+    , runCounterStack
     ) where
 
-import Control.Monad.State (MonadState, get, modify)
-import Control.Monad.Except (MonadError, throwError, catchError)
+import Control.Monad.State (MonadState, get, modify, State, runState)
+import Control.Monad.Except (MonadError, throwError, runExceptT)
+
+import Control.Monad.Trans.Except (ExceptT)
 
 newtype Restoring s = Restoring { unRestoring :: s } 
     deriving Functor
@@ -36,23 +36,42 @@ data Versioned st ev = Versioned
     , aggState :: st
     }
 
+class (EventSourced st ev, MonadState (Versioned st ev) m, MonadError err m)
+    => AggregateMonad st ev err m
+    | st -> ev
+    , st -> err
+    where
+    raiseEvent :: ev -> m ()
+    raiseEvent = raiseEvent'
+    getAggregate :: m st
+    getAggregate = getAggregate'
+    raiseError :: err -> m ()
+    raiseError = throwError
+
 pushEvent :: EventSourced st ev => ev -> Versioned st ev -> Versioned st ev
 pushEvent ev Versioned{..} = Versioned (version + 1) (ev:pendingEvents) (applyEvents aggState [ev])
 
-getAggregate :: (EventSourced st ev, MonadState (Versioned st ev) m) => m st 
-getAggregate = fmap aggState get
+getAggregate' :: (EventSourced st ev, MonadState (Versioned st ev) m) => m st 
+getAggregate' = fmap aggState get
 
 -- Not cool
-raiseError :: (EventSourced st ev, MonadError err m) => err -> m ()
-raiseError = throwError
+--raiseError' :: (EventSourced st ev, MonadError err m) => err -> m ()
+--raiseError' = throwError
 
-raiseEvent :: (EventSourced st ev, MonadState (Versioned st ev) m) => ev -> m ()
-raiseEvent = modify . pushEvent 
+raiseEvent' :: (EventSourced st ev, MonadState (Versioned st ev) m) => ev -> m ()
+raiseEvent' = modify . pushEvent 
 
-runAggregate :: (EventSourced st ev, MonadState (Versioned st ev) m, MonadError err m) 
-             => m a
-             -> m (Either err st)
-runAggregate agg = 
-    catchError result $ \e -> return (Left e)
+instance EventSourced Int Int where
+    initState = 0
+    apply x = fmap (+x)
+
+newtype CounterStack a = CounterStack { unMonad :: ExceptT Int (State (Versioned Int Int)) a }
+    deriving (Functor, Applicative, Monad, MonadError Int, MonadState (Versioned Int Int))
+
+instance AggregateMonad Int Int Int CounterStack
+
+runCounterStack :: Int -> CounterStack a -> Either Int Int
+runCounterStack start agg = fmap (const st) $ e
   where
-    result = fmap Right $ agg >>= const getAggregate 
+    startVersion = Versioned 0 [] start
+    (e, (Versioned _ _ st)) = (runState . runExceptT . unMonad) agg startVersion

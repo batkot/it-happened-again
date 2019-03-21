@@ -7,12 +7,13 @@ module DomainDrivenDesign.MTL
     ( Restoring
     , EventSourced
     , rebuildState
+    , rebuildAggregate
     , AggregateMonad(..)
     
     , runCounterStack
     ) where
 
-import Control.Monad.State (MonadState, get, modify, State, runState)
+import Control.Monad.State (MonadState, get, modify, put, State, runState)
 import Control.Monad.Except (MonadError, throwError, runExceptT)
 
 import Control.Monad.Trans.Except (ExceptT)
@@ -26,6 +27,15 @@ class EventSourced st ev | st -> ev where
 
 rebuildState :: (EventSourced st ev, Foldable f) => f ev -> st
 rebuildState = applyEvents initState
+
+rebuildAggregate 
+    :: (AggregateMonad st ev err m, Foldable f) 
+    => f ev
+    -> m ()
+rebuildAggregate ev = put . Versioned version [] . rebuildState $ ev
+  where
+    version = length ev
+        
 
 applyEvents :: (EventSourced st ev, Foldable f) => st -> f ev -> st
 applyEvents startState = unRestoring . foldr apply (Restoring startState)

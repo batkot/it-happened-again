@@ -1,10 +1,11 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Test.Habit.TrackerSpec 
+module Test.ItHappenedAgain.Tracker.SillySpecs
     ( test_tracker
     ) where
 
-import qualified Habit.Tracker as HT
+import ItHappenedAgain.Tracker.Silly()
+import qualified ItHappenedAgain.Tracker.Data as HT
 
 import qualified Data.Time as DT
 import qualified Data.Time.Calendar as DTC

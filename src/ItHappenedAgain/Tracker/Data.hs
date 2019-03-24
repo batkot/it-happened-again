@@ -23,12 +23,6 @@ data Occurance = Occurance
     , place :: Maybe GeoCords
     } deriving (Show, Eq)
 
-data Command 
-    = Create !TrackingId !String
-    | Track !UTCTime (Maybe GeoCords)
-    | Finish !UTCTime
-    deriving (Show, Eq)
-
 data Event
     = Created !TrackingId !String
     | Happened !UTCTime (Maybe GeoCords)
@@ -37,6 +31,8 @@ data Event
 
 data Error 
     = Error
+    | TrackingAlreadyExists
+    | TrackingNotFound
     | TrackingAlreadyClosed
     deriving (Show, Eq)
 

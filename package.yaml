@@ -49,9 +49,10 @@ tests:
     - -rtsopts
     - -with-rtsopts=-N
     dependencies:
-    - it-happened-again
     - tasty >= 1.2 && < 2
     - tasty-quickcheck >= 0.10 && < 1
     - tasty-discover >= 4.2 && < 5
     - QuickCheck >= 2.12 && < 3
+    - it-happened-again
+    - mtl >= 2.2 && < 3
     - time >= 1.8 && < 2

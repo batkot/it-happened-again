@@ -14,6 +14,14 @@ import qualified DomainDrivenDesign.EventSourcing as ES
 
 import ItHappenedAgain.Tracker.Data
 
+import Data.Time (UTCTime)
+
+data Command 
+    = Create !TrackingId !String
+    | Track !UTCTime (Maybe GeoCords)
+    | Finish !UTCTime
+    deriving (Show, Eq)
+
 instance DDD.EventSourced Tracking Command Event Error where
     initState :: Tracking
     initState = Empty

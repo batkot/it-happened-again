@@ -6,14 +6,15 @@
 module DomainDrivenDesign.MTL 
     ( rebuildAggregate
     , AggregateMonad(..)
-    , AggregateActionT(..)
+    , AggregateActionT
     
+    , runAggregate
     ) where
 
 import Control.Arrow ((&&&))
 
-import Control.Monad.State (MonadState, get, modify, put)
-import Control.Monad.Except (MonadError, throwError)
+import Control.Monad.State (MonadState, get, modify, put, runStateT)
+import Control.Monad.Except (MonadError, throwError, runExceptT)
 
 import Control.Monad.Trans.State (StateT)
 import Control.Monad.Trans.Except (ExceptT)
@@ -57,3 +58,10 @@ raiseEvent' = modify . pushEvent
 
 newtype AggregateActionT st ev err m a = AggregateActionT { runAggregateT :: ExceptT err (StateT (Versioned st ev) m) a }
     deriving (Functor, Applicative, Monad, MonadError err, MonadState (Versioned st ev))
+
+runAggregate :: (Monad m, EventSourced st ev) => st -> AggregateActionT st ev err m a -> m (Either err st)
+runAggregate startState agg = do
+    (e, (Versioned _ _ st)) <- (runStateT . runExceptT . runAggregateT) agg startVersion
+    return $ fmap (const st) $ e
+  where
+    startVersion = Versioned 0 [] startState

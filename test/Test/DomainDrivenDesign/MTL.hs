@@ -1,13 +1,24 @@
 module Test.DomainDrivenDesign.MTL 
-    ( TestTrackerAggregate 
+    ( TestAggregate 
     , given
+    , when
+    , expect
     ) where
 
-import Control.Monad.Identity
+import Control.Monad.Identity (Identity, runIdentity)
 
+import DomainDrivenDesign.EventSourcing
 import DomainDrivenDesign.MTL
 
-type TestTrackerAggregate st ev err a = AggregateActionT st ev err Identity
+type TestAggregate st ev err = AggregateActionT st ev err Identity 
 
-given :: (AggregateMonad st ev err m) => [ev] -> m ()
-given = rebuildAggregate
+type Act st ev err a = TestAggregate st ev err a -> Either err [ev]
+
+given :: (EventSourced st ev, Foldable f) => f ev -> Act st ev err a
+given events = runIdentity . runAggregate events
+
+when :: (EventSourced st ev, Eq ev, Eq err) => Act st ev err a -> TestAggregate st ev err a -> Either err [ev]
+when giv act = giv act 
+
+expect :: Eq a => a -> a -> Bool
+expect = (==)

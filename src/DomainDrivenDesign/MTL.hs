@@ -4,8 +4,7 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
 module DomainDrivenDesign.MTL 
-    ( rebuildAggregate
-    , AggregateMonad(..)
+    ( AggregateMonad(..)
     , AggregateActionT
     
     , runAggregate
@@ -13,21 +12,13 @@ module DomainDrivenDesign.MTL
 
 import Control.Arrow ((&&&))
 
-import Control.Monad.State (MonadState, get, modify, put, runStateT)
+import Control.Monad.State (MonadState, get, modify, runStateT)
 import Control.Monad.Except (MonadError, throwError, runExceptT)
 
 import Control.Monad.Trans.State (StateT)
 import Control.Monad.Trans.Except (ExceptT)
 
 import DomainDrivenDesign.EventSourcing 
-
-rebuildAggregate 
-    :: (AggregateMonad st ev err m, Foldable f) 
-    => f ev
-    -> m ()
-rebuildAggregate ev = put $ Versioned version [] aggState
-  where
-    (version, aggState) = length &&& rebuildState $ ev
 
 pushEvent :: EventSourced st ev => ev -> Versioned st ev -> Versioned st ev
 pushEvent ev Versioned{..} = Versioned (version + 1) (ev:pendingEvents) (apply ev aggState)
@@ -59,9 +50,14 @@ raiseEvent' = modify . pushEvent
 newtype AggregateActionT st ev err m a = AggregateActionT { runAggregateT :: ExceptT err (StateT (Versioned st ev) m) a }
     deriving (Functor, Applicative, Monad, MonadError err, MonadState (Versioned st ev))
 
-runAggregate :: (Monad m, EventSourced st ev) => st -> AggregateActionT st ev err m a -> m (Either err st)
-runAggregate startState agg = do
-    (e, (Versioned _ _ st)) <- (runStateT . runExceptT . runAggregateT) agg startVersion
-    return $ fmap (const st) $ e
+runAggregate 
+    :: (Monad m, EventSourced st ev, Foldable f) 
+    => f ev
+    -> AggregateActionT st ev err m a 
+    -> m (Either err [ev])
+runAggregate events agg = do
+    (e, (Versioned _ ev _)) <- (runStateT . runExceptT . runAggregateT) agg startVersion
+    return $ fmap (const ev) $ e
   where
-    startVersion = Versioned 0 [] startState
+    (version, recoveredState) = length &&& rebuildState $ events
+    startVersion = Versioned version [] recoveredState

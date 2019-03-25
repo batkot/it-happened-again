@@ -8,13 +8,13 @@ import ItHappenedAgain.Tracker.Silly
 import qualified ItHappenedAgain.Tracker.Data as HT
 
 import qualified Data.Time as DT
-import qualified Data.Time.Calendar as DTC
 
 import Test.Tasty (testGroup, TestTree)
 import Test.Tasty.QuickCheck (testProperty)
-import Test.QuickCheck (Arbitrary, arbitrary, oneof, listOf)
+import Test.QuickCheck (Arbitrary, arbitrary, oneof)
 
 import Test.DomainDrivenDesign.Silly (given, expectFailure, expectSingleEvent)
+import Test.ItHappenedAgain.Tracker.Arbitrary
 
 test_tracker :: TestTree
 test_tracker = testGroup "Tracker aggregate tests" 
@@ -36,18 +36,6 @@ test_tracker = testGroup "Tracker aggregate tests"
 
 newtype NonStartingCommand = NonStartingCommand { getCommand :: Command } 
     deriving Show
-
-instance Arbitrary DT.UTCTime where
-    arbitrary = DT.UTCTime <$> dayGen <*> diffTimeGen
-      where
-        dayGen = DTC.fromGregorian <$> arbitrary <*> arbitrary <*> arbitrary
-        diffTimeGen = DT.secondsToDiffTime <$> arbitrary
-
-instance Arbitrary HT.TrackingId where
-    arbitrary = HT.TrackingId <$> arbitrary
-
-instance Arbitrary HT.GeoCords where
-    arbitrary = HT.GeoCords <$> arbitrary
 
 instance Arbitrary NonStartingCommand where
     arbitrary = fmap NonStartingCommand $ oneof 
@@ -71,13 +59,6 @@ canBeStartedWithCreateCommand trackingId description =
     expectedEvent = HT.Created trackingId description
 
 -- 
-newtype EventsForRunningTracking = EventsForRunningTracking { ev :: [HT.Event] }
-    deriving Show
-instance Arbitrary EventsForRunningTracking where
-    arbitrary = do
-        created <- HT.Created <$> arbitrary <*> arbitrary
-        list <- listOf (HT.Happened <$> arbitrary <*> arbitrary)
-        return $ EventsForRunningTracking (list ++ [created])
 
 createOnStartedTrackingCausesError :: HT.TrackingId -> String -> Bool
 createOnStartedTrackingCausesError trackingId description = 
@@ -92,7 +73,7 @@ trackEventOnStartedTrackingRaisesEvent e time place =
     expectSingleEvent st cmd expectedEvent
   where
     st :: HT.Tracking
-    st = given . ev $ e
+    st = given . runningEvents $ e
     cmd = Track time place
     expectedEvent = HT.Happened time place
 
@@ -101,7 +82,7 @@ finishOnStartedTrackingRaisesEvent e time =
     expectSingleEvent st cmd expectedEvent
   where
     st :: HT.Tracking
-    st = given . ev $ e
+    st = given . runningEvents $ e
     cmd = Finish time
     expectedEvent = HT.Finished time
 
@@ -116,6 +97,6 @@ archivedTrackingRaisesError :: EventsForRunningTracking -> DT.UTCTime -> Command
 archivedTrackingRaisesError e finishedTime cmd =
     expectFailure st cmd HT.TrackingAlreadyClosed
   where
-    events = HT.Finished finishedTime : (ev e)
+    events = HT.Finished finishedTime : (runningEvents e)
     st :: HT.Tracking
     st = given events

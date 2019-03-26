@@ -24,6 +24,11 @@ dependencies:
 
 library:
   source-dirs: src
+  default-extensions:
+  - MultiParamTypeClasses
+  - FunctionalDependencies
+  - DeriveFunctor
+  - InstanceSigs
   dependencies:
   - time >= 1.8 && < 2
   - transformers >= 0.5 && < 1

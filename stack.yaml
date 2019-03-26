@@ -66,6 +66,6 @@ packages:
 #
 
 ghc-options:
-    "$everything": -Wall -Werror -XMultiParamTypeClasses -XFunctionalDependencies -XInstanceSigs -XDeriveFunctor
+    "$everything": -Wall -Werror 
 
 rebuild-ghc-options: true

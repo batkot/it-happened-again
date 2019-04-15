@@ -20,14 +20,14 @@ import Control.Monad.Trans.Except (ExceptT)
 
 import DomainDrivenDesign.EventSourcing 
 
-pushEvent :: EventSourced st ev => ev -> Versioned st ev -> Versioned st ev
-pushEvent ev Versioned{..} = Versioned (version + 1) (ev:pendingEvents) (apply ev aggState)
-
 data Versioned st ev = Versioned 
     { version :: Int -- Nat ?
     , pendingEvents :: [ev]
     , aggState :: st
     }
+
+pushEvent :: EventSourced st ev => ev -> Versioned st ev -> Versioned st ev
+pushEvent ev Versioned{..} = Versioned (version + 1) (ev:pendingEvents) (apply ev aggState)
 
 class (EventSourced st ev, MonadState (Versioned st ev) m, MonadError err m)
     => AggregateMonad st ev err m
@@ -47,7 +47,7 @@ getAggregate' = fmap aggState get
 raiseEvent' :: (EventSourced st ev, MonadState (Versioned st ev) m) => ev -> m ()
 raiseEvent' = modify . pushEvent 
 
-newtype AggregateActionT st ev err m a = AggregateActionT { runAggregateT :: ExceptT err (StateT (Versioned st ev) m) a }
+newtype AggregateActionT st ev err m a = AggregateActionT { runAggregateT :: ExceptT err (StateT (Versioned st ev) m) a } 
     deriving (Functor, Applicative, Monad, MonadError err, MonadState (Versioned st ev))
 
 runAggregate 
@@ -61,3 +61,9 @@ runAggregate events agg = do
   where
     (version, recoveredState) = length &&& rebuildState $ events
     startVersion = Versioned version [] recoveredState
+
+makeEventProcessor 
+    :: (EventSourced st ev, Monad m)
+    => AggregateActionT st ev err m a 
+    -> EventProcessor ev m
+makeEventProcessor agg = fmap (either (const []) id) . flip runAggregate agg 

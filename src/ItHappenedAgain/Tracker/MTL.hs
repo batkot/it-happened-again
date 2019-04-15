@@ -8,6 +8,7 @@ module ItHappenedAgain.Tracker.MTL
     ) where
 
 import Data.Time (UTCTime)
+import Data.Text (Text)
 
 import DomainDrivenDesign.MTL 
 
@@ -16,7 +17,7 @@ import ItHappenedAgain.Tracker.Data
 create
     :: (Monad m, AggregateMonad Tracking Event Error m)
     => TrackingId
-    -> String
+    -> Text
     -> m ()
 create trackerId trackerName = 
     ensureNew >> raiseEvent (Created trackerId trackerName)

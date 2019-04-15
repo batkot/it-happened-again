@@ -15,9 +15,10 @@ import qualified DomainDrivenDesign.EventSourcing as ES
 import ItHappenedAgain.Tracker.Data
 
 import Data.Time (UTCTime)
+import Data.Text (Text)
 
 data Command 
-    = Create !TrackingId !String
+    = Create !TrackingId !Text
     | Track !UTCTime (Maybe GeoCords)
     | Finish !UTCTime
     deriving (Show, Eq)

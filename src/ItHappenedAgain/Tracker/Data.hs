@@ -3,6 +3,7 @@ module ItHappenedAgain.Tracker.Data where
 import DomainDrivenDesign.EventSourcing
 
 import Data.Time (UTCTime)
+import Data.Text (Text)
 
 newtype TrackingId = TrackingId { unTrackingId :: Int } deriving (Show, Eq)
 newtype GeoCords = GeoCords { unGeoCords :: (Int, Int) } deriving (Show, Eq)
@@ -14,7 +15,7 @@ data Tracking
 
 data TrackingData = TrackingData
     { identifier :: !TrackingId
-    , name :: !String
+    , name :: !Text
     , occurances :: [Occurance]
     } deriving (Show, Eq)
 
@@ -24,7 +25,7 @@ data Occurance = Occurance
     } deriving (Show, Eq)
 
 data Event
-    = Created !TrackingId !String
+    = Created !TrackingId !Text
     | Happened !UTCTime (Maybe GeoCords)
     | Finished !UTCTime
     deriving (Show, Eq)
@@ -47,4 +48,4 @@ instance EventSourced Tracking Event where
         occurance = Occurance evTime evPlace
         newOccurances = occurance : occurances track
     apply (Finished _) (Running track) = Archived track
-    apply _ s = s
+    apply _ s = s 

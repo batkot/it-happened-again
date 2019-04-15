@@ -7,6 +7,7 @@ module ItHappenedAgain.Tracker.Trans
     ) where
 
 import Data.Time (UTCTime)
+import Data.Text (Text)
 
 import DomainDrivenDesign.Trans
 
@@ -14,7 +15,7 @@ import ItHappenedAgain.Tracker.Data
 
 type TrackerAggregate = AggregateActionMonad Tracking Event Error
     
-create :: TrackingId -> String -> TrackerAggregate ()
+create :: TrackingId -> Text -> TrackerAggregate ()
 create trackerId trackerName = 
     ensureNew >> raiseEvent (Created trackerId trackerName)
 

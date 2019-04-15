@@ -2,6 +2,8 @@
 
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+
 module Test.ItHappenedAgain.Tracker.MTLSpecs
     ( test_tracker_mtl
     ) where

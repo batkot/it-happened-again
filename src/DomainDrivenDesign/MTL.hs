@@ -8,6 +8,7 @@ module DomainDrivenDesign.MTL
     , AggregateActionT
     
     , runAggregate
+    , makeEventProcessor
     ) where
 
 import Control.Arrow ((&&&))

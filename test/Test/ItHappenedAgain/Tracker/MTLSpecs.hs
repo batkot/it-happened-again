@@ -42,12 +42,12 @@ test_tracker_mtl = testGroup "MTL Tracker aggregate tests"
         ]
     ]
 
-createForExistingAggregateRaisesError :: EventsForRunningTracking -> TrackingId -> String -> Bool
-createForExistingAggregateRaisesError events trackId trackName = 
+createForExistingAggregateRaisesError :: EventsForRunningTracking -> TrackingId -> RandomText -> Bool
+createForExistingAggregateRaisesError events trackId (RandomText trackName) = 
     given (runningEvents events) `when` create trackId trackName `expect` Left TrackingAlreadyExists
 
-createWhenAggregateDoesntExistsRaisesEvent :: TrackingId -> String -> Bool
-createWhenAggregateDoesntExistsRaisesEvent trackId trackName =
+createWhenAggregateDoesntExistsRaisesEvent :: TrackingId -> RandomText -> Bool
+createWhenAggregateDoesntExistsRaisesEvent trackId (RandomText trackName) =
     given [] `when` create trackId trackName `expect` Right [Created trackId trackName]
 
 trackWhenAggregateDoesntExistsRaisesError :: UTCTime -> Maybe GeoCords -> Bool

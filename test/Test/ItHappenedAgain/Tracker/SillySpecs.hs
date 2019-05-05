@@ -8,6 +8,7 @@ import ItHappenedAgain.Tracker.Silly
 import qualified ItHappenedAgain.Tracker.Data as HT
 
 import qualified Data.Time as DT
+import Data.Text (pack)
 
 import Test.Tasty (testGroup, TestTree)
 import Test.Tasty.QuickCheck (testProperty)
@@ -49,24 +50,24 @@ startingWithNonCreateCommandCausesError (NonStartingCommand cmd) =
     st :: HT.Tracking
     st = given []
 
-canBeStartedWithCreateCommand :: HT.TrackingId -> String -> Bool
-canBeStartedWithCreateCommand trackingId description =
+canBeStartedWithCreateCommand :: HT.TrackingId -> RandomText -> Bool
+canBeStartedWithCreateCommand trackingId (RandomText trackName) =
     expectSingleEvent st createCmd expectedEvent
   where
     st :: HT.Tracking
     st = given []
-    createCmd = Create trackingId description
-    expectedEvent = HT.Created trackingId description
+    createCmd = Create trackingId trackName
+    expectedEvent = HT.Created trackingId trackName
 
 -- 
 
-createOnStartedTrackingCausesError :: HT.TrackingId -> String -> Bool
-createOnStartedTrackingCausesError trackingId description = 
+createOnStartedTrackingCausesError :: HT.TrackingId -> RandomText -> Bool
+createOnStartedTrackingCausesError trackingId (RandomText trackName) = 
     expectFailure st createCmd HT.Error
   where
     st :: HT.Tracking
-    st = given [HT.Created trackingId description]
-    createCmd = Create trackingId description
+    st = given [HT.Created trackingId trackName]
+    createCmd = Create trackingId trackName
 
 trackEventOnStartedTrackingRaisesEvent :: EventsForRunningTracking -> DT.UTCTime -> Maybe HT.GeoCords -> Bool
 trackEventOnStartedTrackingRaisesEvent e time place = 
@@ -88,7 +89,7 @@ finishOnStartedTrackingRaisesEvent e time =
 
 instance Arbitrary Command where
     arbitrary = oneof
-        [ Create <$> arbitrary <*> arbitrary
+        [ Create <$> arbitrary <*> (fmap pack arbitrary)
         , Track <$> arbitrary <*> arbitrary
         , Finish <$> arbitrary
         ]

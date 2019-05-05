@@ -9,6 +9,11 @@ import qualified Data.Time.Calendar as DTC
 import qualified ItHappenedAgain.Tracker.Data as HT
 
 import Data.List.NonEmpty
+import Data.Text (Text, pack)
+
+newtype RandomText = RandomText { unText :: Text } deriving Show
+instance Arbitrary RandomText where
+    arbitrary = RandomText <$> fmap pack arbitrary
 
 instance Arbitrary DT.UTCTime where
     arbitrary = DT.UTCTime <$> dayGen <*> diffTimeGen
@@ -27,7 +32,7 @@ newtype EventsForRunningTracking = EventsForRunningTracking { runningEvents :: [
 
 instance Arbitrary EventsForRunningTracking where
     arbitrary = do
-        created <- HT.Created <$> arbitrary <*> arbitrary
+        created <- HT.Created <$> arbitrary <*> (fmap pack arbitrary)
         list <- listOf (HT.Happened <$> arbitrary <*> arbitrary)
         return $ EventsForRunningTracking (list ++ [created])
 
@@ -43,7 +48,7 @@ instance Arbitrary ClosedTrackingEvents where
 
 instance Arbitrary HT.Event where
     arbitrary = oneof
-        [ HT.Created <$> arbitrary <*> arbitrary
+        [ HT.Created <$> arbitrary <*> (fmap pack arbitrary)
         , HT.Happened <$> arbitrary <*> arbitrary
         , HT.Finished <$> arbitrary 
         ]

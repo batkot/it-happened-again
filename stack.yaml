@@ -64,8 +64,4 @@ packages:
 # compiler-check: newer-minor
 #
 #
-
-ghc-options:
-    "$everything": -Wall -Werror 
-
 rebuild-ghc-options: true

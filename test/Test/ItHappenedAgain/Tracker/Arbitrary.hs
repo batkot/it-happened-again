@@ -32,7 +32,7 @@ newtype EventsForRunningTracking = EventsForRunningTracking { runningEvents :: [
 
 instance Arbitrary EventsForRunningTracking where
     arbitrary = do
-        created <- HT.Created <$> arbitrary <*> (fmap pack arbitrary)
+        created <- HT.Created <$> arbitrary <*> fmap pack arbitrary
         list <- listOf (HT.Happened <$> arbitrary <*> arbitrary)
         return $ EventsForRunningTracking (list ++ [created])
 
@@ -43,12 +43,12 @@ instance Arbitrary ClosedTrackingEvents where
     arbitrary = do 
         running <- arbitrary :: Gen EventsForRunningTracking
         closed <- HT.Finished <$> arbitrary
-        return $ ClosedTrackingEvents $ closed : (runningEvents running)
+        return $ ClosedTrackingEvents $ closed : runningEvents running
         
 
 instance Arbitrary HT.Event where
     arbitrary = oneof
-        [ HT.Created <$> arbitrary <*> (fmap pack arbitrary)
+        [ HT.Created <$> arbitrary <*> fmap pack arbitrary
         , HT.Happened <$> arbitrary <*> arbitrary
         , HT.Finished <$> arbitrary 
         ]

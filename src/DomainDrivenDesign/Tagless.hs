@@ -1,7 +1,3 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE FlexibleContexts #-}
-
 module DomainDrivenDesign.Tagless 
     ( Aggregate
     , MonadAggregateAction(..)

@@ -59,8 +59,6 @@ canBeStartedWithCreateCommand trackingId (RandomText trackName) =
     createCmd = Create trackingId trackName
     expectedEvent = HT.Created trackingId trackName
 
--- 
-
 createOnStartedTrackingCausesError :: HT.TrackingId -> RandomText -> Bool
 createOnStartedTrackingCausesError trackingId (RandomText trackName) = 
     expectFailure st createCmd HT.Error

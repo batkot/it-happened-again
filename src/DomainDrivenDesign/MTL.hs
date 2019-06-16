@@ -1,5 +1,4 @@
 {-# LANGUAGE RecordWildCards #-}
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
@@ -45,7 +44,7 @@ runAggregateActionT
     -> AggregateActionT st ev err m a 
     -> m (Either err [ev])
 runAggregateActionT events agg = do
-    (e, (Versioned _ ev _)) <- (runStateT . runExceptT . runAggregateT) agg startVersion
+    (e, Versioned _ ev _) <- (runStateT . runExceptT . runAggregateT) agg startVersion
     return $ ev <$ e
   where
     (version, recoveredState) = length &&& rebuildState $ events

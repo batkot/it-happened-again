@@ -16,13 +16,9 @@ import Test.ItHappenedAgain.Tracker.Arbitrary
 
 import Data.Time
 
-import DomainDrivenDesign.MTL
 import ItHappenedAgain.Tracker.Data
-import ItHappenedAgain.Tracker.MTL
+import ItHappenedAgain.Tracker.Tagless
 
-type TestTrackingAggregate = TestAggregate Tracking Event Error
-
-instance AggregateMonad Tracking Event Error TestTrackingAggregate
 
 test_tracker_mtl :: TestTree
 test_tracker_mtl = testGroup "MTL Tracker aggregate tests"
@@ -44,11 +40,11 @@ test_tracker_mtl = testGroup "MTL Tracker aggregate tests"
 
 createForExistingAggregateRaisesError :: EventsForRunningTracking -> TrackingId -> RandomText -> Bool
 createForExistingAggregateRaisesError events trackId (RandomText trackName) = 
-    given (runningEvents events) `when` create trackId trackName `expect` Left TrackingAlreadyExists
+    given (runningEvents events) `when` create trackId trackName `expect` Left TrackingAlreadyExists 
 
 createWhenAggregateDoesntExistsRaisesEvent :: TrackingId -> RandomText -> Bool
 createWhenAggregateDoesntExistsRaisesEvent trackId (RandomText trackName) =
-    given [] `when` create trackId trackName `expect` Right [Created trackId trackName]
+    given [] `when` create trackId trackName `expect` (Right [Created trackId trackName] :: Either Error [Event])
 
 trackWhenAggregateDoesntExistsRaisesError :: UTCTime -> Maybe GeoCords -> Bool
 trackWhenAggregateDoesntExistsRaisesError eventTime eventPlace = 
@@ -60,7 +56,7 @@ trackWhenTrackArchivedRaisesError events eventTime eventPlace =
 
 trackOnRunningTrackRaisesEvent :: EventsForRunningTracking -> UTCTime -> Maybe GeoCords -> Bool
 trackOnRunningTrackRaisesEvent events eventTime eventPlace = 
-    given (runningEvents events) `when` track eventTime eventPlace `expect` Right [Happened eventTime eventPlace]
+    given (runningEvents events) `when` track eventTime eventPlace `expect` (Right [Happened eventTime eventPlace] :: Either Error [Event])
 
 finishWhenAggregateDoesntExistsRaisesError :: UTCTime -> Bool
 finishWhenAggregateDoesntExistsRaisesError finishTime = 
@@ -72,4 +68,4 @@ finishWhenTrackArchivedRaisesError events finishTime =
 
 finishOnRunningTrackRaisesEvent :: EventsForRunningTracking -> UTCTime -> Bool
 finishOnRunningTrackRaisesEvent events finishTime = 
-    given (runningEvents events) `when` finish finishTime `expect` Right [Finished finishTime]
+    given (runningEvents events) `when` finish finishTime `expect` (Right [Finished finishTime] :: Either Error [Event])

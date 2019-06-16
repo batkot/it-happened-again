@@ -15,7 +15,7 @@ type TestAggregate st ev err = AggregateActionT st ev err Identity
 type Act st ev err a = TestAggregate st ev err a -> Either err [ev]
 
 given :: (EventSourced st ev, Foldable f) => f ev -> Act st ev err a
-given events = runIdentity . runAggregate events
+given events = runIdentity . runAggregateActionT events
 
 when :: (EventSourced st ev, Eq ev, Eq err) => Act st ev err a -> TestAggregate st ev err a -> Either err [ev]
 when giv act = giv act 

@@ -1,15 +1,14 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-
 {-# LANGUAGE RecordWildCards #-}
 {-# LANGUAGE TypeSynonymInstances #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 
 module ItHappenedAgain where
 
 import DomainDrivenDesign.MTL
 
 import ItHappenedAgain.Tracker.Data
-import ItHappenedAgain.Tracker.MTL
+import ItHappenedAgain.Tracker.Tagless
 
 import Data.Text (Text)
 
@@ -18,14 +17,11 @@ data CreateTracking = CreateTracking
     , ctName :: !Text
     }
 
-type TrackingAction m = AggregateActionT Tracking Event Error m
-instance Monad m => AggregateMonad Tracking Event Error (TrackingAction m)
-
-createTracking :: Monad m => (Int -> m [Event])-> CreateTracking -> m ()
+createTracking :: forall m. Monad m => (Int -> m [Event])-> CreateTracking -> m ()
 createTracking fetchEvents CreateTracking{..} = do
-    fetchEvents ctId >>= \e -> runAggregate e action >>= storeEvents >>= monadVoid
+    fetchEvents ctId >>= \e -> runAggregateActionT e action >>= storeEvents 
   where
-    monadVoid = const $ return ()
-    storeEvents = const $ return True
+    storeEvents = const $ return ()
     trackId = TrackingId ctId
+    action :: AggregateActionT Tracking Event Error m ()
     action = create trackId ctName 

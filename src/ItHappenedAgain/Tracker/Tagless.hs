@@ -1,3 +1,5 @@
+{-# OPTIONS_GHC -fno-warn-orphans #-}
+
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE LambdaCase #-}
 
@@ -13,6 +15,8 @@ import Data.Text (Text)
 import DomainDrivenDesign.Tagless
 
 import ItHappenedAgain.Tracker.Data 
+
+instance Aggregate Tracking Event Error 
 
 create
     :: MonadAggregateAction Tracking Event Error m

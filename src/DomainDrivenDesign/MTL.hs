@@ -40,10 +40,10 @@ instance (Aggregate st ev err, Monad m) => MonadAggregateAction st ev err (Aggre
 
 runAggregateActionT
     :: (Monad m, EventSourced st ev, Foldable f) 
-    => f ev
-    -> AggregateActionT st ev err m a 
+    => AggregateActionT st ev err m a 
+    -> f ev
     -> m (Either err [ev])
-runAggregateActionT events agg = do
+runAggregateActionT agg events = do
     (e, Versioned _ ev _) <- (runStateT . runExceptT . runAggregateT) agg startVersion
     return $ ev <$ e
   where
@@ -54,4 +54,4 @@ makeEventProcessor
     :: (EventSourced st ev, Monad m)
     => AggregateActionT st ev err m a 
     -> EventProcessor ev m
-makeEventProcessor agg = fmap (either (const []) id) . flip runAggregateActionT agg 
+makeEventProcessor agg = fmap (either (const []) id) . runAggregateActionT agg 

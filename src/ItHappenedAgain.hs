@@ -15,11 +15,16 @@ data CreateTracking = CreateTracking
     , ctName :: !Text
     }
 
-createTracking :: forall m. Monad m => (Int -> m [Event])-> CreateTracking -> m ()
+createTracking 
+    :: forall m. Monad m 
+    => (Int -> m [Event]) 
+    -> CreateTracking 
+    -> m ()
 createTracking fetchEvents CreateTracking{..} = do
-    fetchEvents ctId >>= \e -> runAggregateActionT e action >>= storeEvents 
+    fetchEvents ctId >>= runAggregateActionT action >>= storeEvents 
   where
     storeEvents = const $ return ()
     trackId = TrackingId ctId
     action :: AggregateActionT Tracking Event Error m ()
     action = create trackId ctName 
+

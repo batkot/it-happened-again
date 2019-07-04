@@ -1,4 +1,4 @@
-module DomainDrivenDesign.Tagless 
+module DomainDrivenDesign.Aggregate
     ( Aggregate
     , MonadAggregateAction(..)
     )

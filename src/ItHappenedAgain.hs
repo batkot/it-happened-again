@@ -5,8 +5,7 @@ module ItHappenedAgain where
 
 import DomainDrivenDesign.MTL
 
-import ItHappenedAgain.Tracker.Data
-import ItHappenedAgain.Tracker.Tagless
+import ItHappenedAgain.Tracker
 
 import Data.Text (Text)
 
@@ -15,12 +14,13 @@ data CreateTracking = CreateTracking
     , ctName :: !Text
     }
 
+-- | This thing should build some kind of event processor
 createTracking 
     :: forall m. Monad m 
     => (Int -> m [Event]) 
     -> CreateTracking 
     -> m ()
-createTracking fetchEvents CreateTracking{..} = do
+createTracking fetchEvents CreateTracking{..} = 
     fetchEvents ctId >>= runAggregateActionT action >>= storeEvents 
   where
     storeEvents = const $ return ()

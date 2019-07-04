@@ -18,7 +18,7 @@ import Control.Monad.Trans.State (StateT)
 import Control.Monad.Trans.Except (ExceptT)
 
 import DomainDrivenDesign.EventSourcing 
-import DomainDrivenDesign.Tagless
+import DomainDrivenDesign.Aggregate
 
 data Versioned st ev = Versioned 
     { version :: Int -- Nat ?

@@ -1,12 +1,12 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-}
 
-module Test.ItHappenedAgain.Tracker.Arbitrary where
+module Test.ItHappenedAgain.Arbitrary where
 
 import Test.QuickCheck (Arbitrary, arbitrary, listOf, oneof, Gen)
 
 import qualified Data.Time as DT
 import qualified Data.Time.Calendar as DTC
-import qualified ItHappenedAgain.Tracker.Data as HT
+import qualified ItHappenedAgain.Tracker as HT
 
 import Data.List.NonEmpty
 import Data.Text (Text, pack)
